@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyShare - Condivisione Appunti</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    min-height:100vh;
+    padding:20px;
+    font-size:16px;
+}
+.container{max-width:1400px;margin:0 auto;}
+header{
+    background:white;
+    padding:30px;
+    border-radius:18px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+    margin-bottom:35px;
+    text-align:center;
+}
+h1{color:#667eea;font-size:2.5em;margin-bottom:10px;}
+.subtitle{color:#666;font-size:1.15em;}
+
+.category-container{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(350px,1fr));
+    gap:25px;
+}
+.category-card{
+    background:white;
+    border-radius:18px;
+    padding:25px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.15);
+    transition:transform .3s ease;
+}
+.category-card:hover{transform:translateY(-5px);}
+.category-header{
+    display:flex;
+    align-items:center;
+    margin-bottom:20px;
+    padding-bottom:12px;
+    border-bottom:4px solid;
+}
+.category-icon{font-size:2.4em;margin-right:15px;}
+.category-title{font-size:1.7em;font-weight:bold;}
+
+.scientifiche .category-header{border-bottom-color:#4CAF50;}
+.umanistiche .category-header{border-bottom-color:#FF9800;}
+.lingue .category-header{border-bottom-color:#2196F3;}
+.scientifiche .category-title{color:#4CAF50;}
+.umanistiche .category-title{color:#FF9800;}
+.lingue .category-title{color:#2196F3;}
+
+.subject-list{list-style:none;}
+.subject-item{
+    background:#f8f9fa;
+    padding:15px;
+    margin-bottom:10px;
+    border-radius:12px;
+    cursor:pointer;
+    transition:all .3s ease;
+    border-left:5px solid transparent;
+    font-size:1em;
+}
+.subject-name{font-size:1.1em;font-weight:600;}
+.subject-stats{font-size:0.95em;color:#666;}
+
+.scientifiche .subject-item:hover{background:#e8f5e9;border-left-color:#4CAF50;}
+.umanistiche .subject-item:hover{background:#fff3e0;border-left-color:#FF9800;}
+.lingue .subject-item:hover{background:#e3f2fd;border-left-color:#2196F3;}
+
+.modal{
+    display:none;
+    position:fixed;
+    top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.7);
+    z-index:1000;overflow-y:auto;
+}
+.modal.show{display:block;}
+
+.modal-content{
+    background:white;
+    max-width:900px;
+    margin:50px auto;
+    padding:32px;
+    border-radius:18px;
+    position:relative;
+    font-size:16px;
+}
+.close-btn{
+    position:absolute;top:20px;right:25px;
+    font-size:2.2em;cursor:pointer;color:#999;
+}
+.close-btn:hover{color:#333;}
+.modal-header{
+    margin-bottom:20px;
+    padding-bottom:15px;
+    border-bottom:4px solid #667eea;
+}
+.modal-title{font-size:2em;color:#667eea;}
+
+.class-selector{margin-bottom:20px;padding:18px;background:#f8f9fa;border-radius:10px;}
+.class-buttons{display:flex;gap:10px;flex-wrap:wrap;}
+.class-btn{
+    flex:1;
+    padding:12px 18px;
+    border:3px solid #667eea;
+    background:white;
+    color:#667eea;
+    border-radius:10px;
+    font-size:1.05em;
+    font-weight:700;
+    cursor:pointer;
+}
+.class-btn.active{background:#667eea;color:white;}
+
+.tabs{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+    border-bottom:3px solid #e0e0e0;
+}
+.tab{
+    padding:12px 25px;
+    cursor:pointer;
+    font-size:1.05em;
+    font-weight:700;
+    background:none;
+    border:none;
+    border-bottom:4px solid transparent;
+}
+.tab.active{
+    color:#667eea;
+    border-bottom-color:#667eea;
+}
+
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+
+.upload-section{
+    background:#f8f9fa;
+    padding:20px;
+    border-radius:12px;
+    margin-bottom:20px;
+}
+
+label{font-weight:700;font-size:1em;margin-bottom:6px;display:block;}
+input,textarea{
+    width:100%;
+    padding:12px;
+    font-size:1em;
+    border:2px solid #ccc;
+    border-radius:10px;
+}
+textarea{min-height:120px;resize:vertical;}
+
+.btn{
+    padding:12px 26px;
+    background:#667eea;
+    border:none;
+    border-radius:10px;
+    font-size:1.1em;
+    font-weight:700;
+    color:white;
+    cursor:pointer;
+}
+.btn:hover{background:#5568d3;}
+
+.materials-list{display:grid;gap:20px;}
+.material-card{
+    background:#f8f9fa;
+    padding:18px;
+    border-radius:12px;
+    border-left:6px solid #667eea;
+}
+.material-title{font-size:1.25em;font-weight:700;}
+.material-description{font-size:1.05em;color:#555;margin:10px 0;}
+
+.btn-small{
+    padding:8px 16px;
+    font-size:0.95em;
+    background:#667eea;
+    border:none;
+    color:white;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.empty-state{padding:40px;text-align:center;font-size:1.1em;color:#999;}
+.empty-state-icon{font-size:3.5em;margin-bottom:10px;}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<header>
+<h1>📚 StudyShare</h1>
+<p class="subtitle">Condividi i tuoi appunti e video con la classe</p>
+</header>
+
+<div class="category-container">
+
+<!-- SCIENTIFICHE -->
+<div class="category-card scientifiche">
+    <div class="category-header">
+        <span class="category-icon">🔬</span>
+        <h2 class="category-title">Materie Scientifiche</h2>
+    </div>
+    <ul class="subject-list">
+        <li class="subject-item" data-subject="Chimica">🧪 Chimica <div class="subject-stats">0 totali</div></li>
+        <li class="subject-item" data-subject="Matematica">📐 Matematica <div class="subject-stats">0 totali</div></li>
+        <li class="subject-item" data-subject="Fisica">⚛️ Fisica <div class="subject-stats">0 totali</div></li>
+        <li class="subject-item" data-subject="Informatica">💻 Informatica <div class="subject-stats">0 totali</div></li>
+    </ul>
+</div>
+
+<!-- UMANISTICHE -->
+<div class="category-card umanistiche">
+    <div class="category-header">
+        <span class="category-icon">📖</span>
+        <h2 class="category-title">Materie Umanistiche</h2>
+    </div>
+    <ul class="subject-list">
+        <li class="subject-item" data-subject="Latino">🏛️ Latino <div class="subject-stats">0 totali</div></li>
+        <li class="subject-item" data-subject="Italiano">🇮🇹 Italiano <div class="subject-stats">0 totali</div></li>
+        <li class="subject-item" data-subject="Geo Storia">🌍 Geo Storia <div class="subject-stats">0 totali</div></li>
+        <li class="subject-item" data-subject="Arte e Immagine">🎨 Arte e Immagine <div class="subject-stats">0 totali</div></li>
+    </ul>
+</div>
+
+<!-- LINGUE -->
+<div class="category-card lingue">
+    <div class="category-header">
+        <span class="category-icon">🌐</span>
+        <h2 class="category-title">Lingue</h2>
+    </div>
+    <ul class="subject-list">
+        <li class="subject-item" data-subject="Inglese">🇬🇧 Inglese <div class="subject-stats">0 totali</div></li>
+    </ul>
+</div>
+
+</div>
+</div>
+
+<!-- MODAL -->
+<div id="subjectModal" class="modal">
+<div class="modal-content">
+
+<span class="close-btn">&times;</span>
+
+<div class="modal-header">
+<h2 class="modal-title" id="modalTitle"></h2>
+</div>
+
+<div class="class-selector">
+<label>Seleziona la classe:</label>
+<div class="class-buttons">
+    <button class="class-btn active" data-class="Prima">Prima</button>
+    <button class="class-btn" data-class="Seconda">Seconda</button>
+    <button class="class-btn" data-class="Terza">Terza</button>
+    <button class="class-btn" data-class="Quarta">Quarta</button>
+    <button class="class-btn" data-class="Quinta">Quinta</button>
+</div>
+</div>
+
+<div class="tabs">
+    <button class="tab active" data-tab="notes">📄 Appunti</button>
+    <button class="tab" data-tab="videos">🎬 Video</button>
+</div>
+
+<!-- APPUNTI -->
+<div class="tab-content active" id="notes">
+<div class="upload-section">
+<h3>📤 Carica un Appunto</h3>
+<form id="noteForm">
+<label>Titolo</label>
+<input type="text" id="noteTitle" required>
+<label>Descrizione</label>
+<textarea id="noteDescription"></textarea>
+<label>File (PDF, DOC, JPG, PNG)</label>
+<input type="file" id="noteFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required>
+<button class="btn">Carica Appunto</button>
+</form>
+</div>
+<h3>📚 Appunti caricati</h3>
+<div id="notesList" class="materials-list"></div>
+</div>
+
+<!-- VIDEO -->
+<div class="tab-content" id="videos">
+<div class="upload-section">
+<h3>🎬 Carica un Video</h3>
+<form id="videoForm">
+<label>Titolo</label>
+<input type="text" id="videoTitle" required>
+<label>Descrizione</label>
+<textarea id="videoDescription"></textarea>
+<label>Video (MP4, MOV, AVI)</label>
+<input type="file" id="videoFile" accept=".mp4,.mov,.avi" required>
+<button class="btn">Carica Video</button>
+</form>
+</div>
+<h3>🎥 Video caricati</h3>
+<div id="videosList" class="materials-list"></div>
+</div>
+
+</div>
+</div>
+
+<script>
+(function(){
+let currentSubject="",currentClass="Prima";
+
+const subjects=["Chimica","Matematica","Fisica","Informatica","Latino","Italiano","Geo Storia","Arte e Immagine","Inglese"];
+const classes=["Prima","Seconda","Terza","Quarta","Quinta"];
+
+const materials={};
+subjects.forEach(s=>{
+    materials[s]={};
+    classes.forEach(c=>{
+        materials[s][c]={notes:[],videos:[]};
+    });
+});
+
+// MODAL APERTURA
+document.querySelectorAll(".subject-item").forEach(item=>{
+item.addEventListener("click",()=>{
+    currentSubject=item.dataset.subject;
+    currentClass="Prima";
+    document.getElementById("modalTitle").textContent=currentSubject;
+    document.getElementById("subjectModal").classList.add("show");
+    loadNotes();
+    loadVideos();
+});
+});
+
+// CAMBIO CLASSE
+document.querySelectorAll(".class-btn").forEach(btn=>{
+btn.addEventListener("click",()=>{
+    document.querySelectorAll(".class-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    currentClass=btn.dataset.class;
+    loadNotes();
+    loadVideos();
+});
+});
+
+// TABS
+document.querySelectorAll(".tab").forEach(tab=>{
+tab.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    tab.classList.add("active");
+    document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
+    document.getElementById(tab.dataset.tab).classList.add("active");
+});
+});
+
+// CHIUSURA MODAL
+document.querySelector(".close-btn").onclick=()=>document.getElementById("subjectModal").classList.remove("show");
+window.onclick=e=>{if(e.target===document.getElementById("subjectModal"))document.getElementById("subjectModal").classList.remove("show");};
+
+// CARICA APPUNTO
+document.getElementById("noteForm").addEventListener("submit",e=>{
+e.preventDefault();
+const file=document.getElementById("noteFile").files[0];
+if(!file)return;
+
+materials[currentSubject][currentClass].notes.push({
+    title:document.getElementById("noteTitle").value,
+    description:document.getElementById("noteDescription").value,
+    fileName:file.name,
+    url:URL.createObjectURL(file),
+    date:new Date().toLocaleDateString("it-IT"),
+    author:"Studente"
+});
+
+e.target.reset();
+loadNotes();
+updateStats();
+});
+
+// CARICA VIDEO
+document.getElementById("videoForm").addEventListener("submit",e=>{
+e.preventDefault();
+const file=document.getElementById("videoFile").files[0];
+if(!file)return;
+
+materials[currentSubject][currentClass].videos.push({
+    title:document.getElementById("videoTitle").value,
+    description:document.getElementById("videoDescription").value,
+    fileName:file.name,
+    url:URL.createObjectURL(file),
+    date:new Date().toLocaleDateString("it-IT"),
+    author:"Studente"
+});
+
+e.target.reset();
+loadVideos();
+updateStats();
+});
+
+// LISTA APPUNTI
+function loadNotes(){
+const list=document.getElementById("notesList");
+const notes=materials[currentSubject][currentClass].notes;
+
+if(notes.length===0){
+list.innerHTML='<div class="empty-state"><div class="empty-state-icon">📭</div>Nessun appunto caricato.</div>';
+return;
+}
+
+list.innerHTML="";
+notes.forEach((n,i)=>{
+const div=document.createElement("div");
+div.className="material-card";
+div.innerHTML=`
+<div class="material-title">${n.title}</div>
+<div class="material-meta">📅 ${n.date} • 📎 ${n.fileName}</div>
+<div class="material-description">${n.description||"Nessuna descrizione"}</div>
+<div style="display:flex;gap:10px;">
+<a href="${n.url}" download="${n.fileName}" class="btn-small">⬇️ Scarica</a>
+<button class="btn-small" data-del="${i}">🗑️ Elimina</button>
+</div>`;
+list.appendChild(div);
+});
+
+list.querySelectorAll("[data-del]").forEach(btn=>{
+btn.onclick=()=>{
+    if(confirm("Eliminare questo appunto?")){
+        materials[currentSubject][currentClass].notes.splice(btn.dataset.del,1);
+        loadNotes();updateStats();
+    }
+};
+});
+}
+
+// LISTA VIDEO
+function loadVideos(){
+const list=document.getElementById("videosList");
+const videos=materials[currentSubject][currentClass].videos;
+
+if(videos.length===0){
+list.innerHTML='<div class="empty-state"><div class="empty-state-icon">🎥</div>Nessun video caricato.</div>';
+return;
+}
+
+list.innerHTML="";
+videos.forEach((v,i)=>{
+const div=document.createElement("div");
+div.className="material-card";
+div.innerHTML=`
+<div class="material-title">${v.title}</div>
+<div class="material-meta">📅 ${v.date} • 🎥 ${v.fileName}</div>
+<div class="material-description">${v.description||"Nessuna descrizione"}</div>
+<video src="${v.url}" controls style="width:100%;border-radius:10px;margin:10px 0;"></video>
+<div style="display:flex;gap:10px;">
+<a href="${v.url}" download="${v.fileName}" class="btn-small">⬇️ Scarica</a>
+<button class="btn-small" data-del="${i}">🗑️ Elimina</button>
+</div>`;
+list.appendChild(div);
+});
+
+list.querySelectorAll("[data-del]").forEach(btn=>{
+btn.onclick=()=>{
+    if(confirm("Eliminare questo video?")){
+        materials[currentSubject][currentClass].videos.splice(btn.dataset.del,1);
+        loadVideos();updateStats();
+    }
+};
+});
+}
+
+// AGGIORNA STATISTICHE
+function updateStats(){
+subjects.forEach(s=>{
+    const el=document.querySelector(`.subject-item[data-subject="${s}"] .subject-stats`);
+    let tot=0;
+    classes.forEach(c=>{
+        tot+=materials[s][c].notes.length;
+        tot+=materials[s][c].videos.length;
+    });
+    el.textContent=tot+" totali";
+});
+}
+
+})();
+</script>
+
+</body>
+</html>
